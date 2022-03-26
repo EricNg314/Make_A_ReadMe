@@ -1,0 +1,23 @@
+{
+  "name": "make_a_readme",
+  "version": "1.0.0",
+  "description": "Making a quick readme.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EricNg314/Make_A_ReadMe.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/EricNg314/Make_A_ReadMe/issues"
+  },
+  "homepage": "https://github.com/EricNg314/Make_A_ReadMe#readme",
+  "dependencies": {
+    "inquirer": "^8.2.2"
+  }
+}
