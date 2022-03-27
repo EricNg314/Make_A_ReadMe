@@ -6,15 +6,19 @@ let readMeStr = "";
 async function buildReadme() {
   const filename = "./result/README.md";
   const title = await buildTitle();
-  const titleStr = title ?  `# ${title} \n\n` : "";
+  const titleStr = title ? `# ${title} \n` : "";
   const descriptionStr = await buildDescription();
   let headers = {
-    'title': title
-  }
-  const tableOfContentsStr = await buildTableOfContents("tableOfContents", title);
+    title: title,
+  };
+  const installationStr = await buildInstallation();
+  const tableOfContentsStr = await buildTableOfContents(
+    "tableOfContents",
+    installationStr
+  );
 
   // console.log(titleStr);
-  readMeStr += `${titleStr}${descriptionStr}${tableOfContentsStr}`;
+  readMeStr += `${titleStr}${descriptionStr}${tableOfContentsStr}${installationStr}`;
   console.log(readMeStr);
   fs.writeFile(filename, readMeStr, (err) =>
     err ? console.log(err) : console.log(`Success! Please check ${filename}`)
@@ -66,25 +70,86 @@ const buildDescription = async () => {
         name: "learn",
         type: "input",
         message: "What did you learn?",
-      }
+      },
     ])
     .then((data) => {
       const { motivation, why, problem, learn } = data;
-        descriptionStr = `## Description \n`
-        descriptionStr += ` - What was your motivation? ${motivation} \n`
-        descriptionStr += ` - Why did you build this project? ${why} \n`
-        descriptionStr += ` - What problem does it solve? ${problem} \n`
-        descriptionStr += ` - What did you learn? ${learn} \n\n`
+      descriptionStr = `\n## Description \n`;
+      descriptionStr += ` - What was your motivation? ${motivation} \n`;
+      descriptionStr += ` - Why did you build this project? ${why} \n`;
+      descriptionStr += ` - What problem does it solve? ${problem} \n`;
+      descriptionStr += ` - What did you learn? ${learn} \n\n`;
     });
   return descriptionStr;
 };
 
+const buildInstallation = async () => {
+  let installationStr = "";
+  let completeInstruction = false;
+  let needHeader = true;
+  let needInstallation = true;
+  do {
+    if(needHeader === true){
+      await inquirer
+        .prompt([
+          {
+            name: "instruction",
+            type: "confirm",
+            message: "Add installation instructions?",
+          },
+        ])
+        .then((data) => {
+          const { instruction } = data;
+          
+          if (instruction === true) {
+            installationStr = `\n## Installation \n`;
+          }
+          needInstallation = instruction;
+          needHeader = false;
+        });
+    };
+    if(needInstallation === false){
+      // Ends loops if installation is not required.
+      break;
+    };
+    await inquirer
+      .prompt([
+        {
+          name: "installText",
+          type: "input",
+          message: "How to install(text)?",
+        },
+        {
+          name: "installCode",
+          type: "input",
+          message: "How to install(code)?",
+        },
+        {
+          name: "moreInstructions",
+          type: "confirm",
+          message: "Add more instructions?",
+        }
+      ])
+      .then((data) => {
+        console.log('data: ', data)
+        const { installText, installCode, moreInstructions } = data;
+        installationStr += ` - ${installText} \n`;
+        installationStr += ' - ```\n    ' + installCode + '\n    ``` \n';
+
+        completeInstruction = !moreInstructions
+      });
+    // completeInstruction = true;
+  } while (completeInstruction === false);
+
+  return installationStr;
+};
+
 const buildTableOfContents = async (tableOfContents, ...variables) => {
-  console.log('variables: ', variables)
+  console.log("variables: ", variables);
   // console.log(data)
   let tableOfContentsStr = "";
   if (tableOfContents) {
-    tableOfContentsStr = `## tableOfContents
+    tableOfContentsStr = `\n## tableOfContents
     ${tableOfContents}
     
     `;
