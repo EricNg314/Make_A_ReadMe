@@ -5,55 +5,82 @@ let readMeStr = "";
 
 async function buildReadme() {
   const filename = "./result/README.md";
-  const titleStr = await buildTitle();
-  const descriptionStr = buildDescription("description");
-  const tableOfContentsStr = buildTableOfContents("tableOfContents");
+  const title = await buildTitle();
+  const titleStr = title ?  `# ${title} \n\n` : "";
+  const descriptionStr = await buildDescription();
+  let headers = {
+    'title': title
+  }
+  const tableOfContentsStr = await buildTableOfContents("tableOfContents", title);
 
-  console.log(titleStr);
-  readMeStr += `${titleStr}${tableOfContentsStr}${descriptionStr}`;
+  // console.log(titleStr);
+  readMeStr += `${titleStr}${descriptionStr}${tableOfContentsStr}`;
   console.log(readMeStr);
   fs.writeFile(filename, readMeStr, (err) =>
     err ? console.log(err) : console.log(`Success! Please check ${filename}`)
   );
 }
 
-
-async function buildTitle () {
-  console.log('individual buildTitle')
-  let titleStr = '';
+const buildTitle = async () => {
+  let titleStr = "";
   await inquirer
     .prompt([
       {
         name: "title",
         type: "input",
         message: "Title:",
-      }
+      },
     ])
-    .then(data => {
-      console.log('individual')
-      const {title} = data;
-      if (title) {
-        titleStr = `# ${title}
-      `;
-      }
+    .then((data) => {
+      const { title } = data;
+      titleStr = title;
+      // if (title) {
+      //   titleStr = `# ${title}
+      // `;
+      // }
     });
-    console.log(titleStr)
-    return titleStr;
+  // console.log(titleStr);
+  return titleStr;
 };
 
-const buildDescription = (description) => {
+const buildDescription = async () => {
   let descriptionStr = "";
-  if (description) {
-    inquirer.prompt([]).then((data) => {});
-    descriptionStr = `## Description
-    ${description}
-    
-    `;
-  }
+  await inquirer
+    .prompt([
+      {
+        name: "motivation",
+        type: "input",
+        message: "What was your motivation?",
+      },
+      {
+        name: "why",
+        type: "input",
+        message: "Why did you build this project?",
+      },
+      {
+        name: "problem",
+        type: "input",
+        message: "What problem does it solve?",
+      },
+      {
+        name: "learn",
+        type: "input",
+        message: "What did you learn?",
+      }
+    ])
+    .then((data) => {
+      const { motivation, why, problem, learn } = data;
+        descriptionStr = `## Description \n`
+        descriptionStr += ` - What was your motivation? ${motivation} \n`
+        descriptionStr += ` - Why did you build this project? ${why} \n`
+        descriptionStr += ` - What problem does it solve? ${problem} \n`
+        descriptionStr += ` - What did you learn? ${learn} \n\n`
+    });
   return descriptionStr;
 };
 
-const buildTableOfContents = (tableOfContents) => {
+const buildTableOfContents = async (tableOfContents, ...variables) => {
+  console.log('variables: ', variables)
   // console.log(data)
   let tableOfContentsStr = "";
   if (tableOfContents) {
@@ -64,8 +91,6 @@ const buildTableOfContents = (tableOfContents) => {
   }
   return tableOfContentsStr;
 };
-
-
 
 buildReadme();
 
