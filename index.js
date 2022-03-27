@@ -8,16 +8,12 @@ async function buildReadme() {
   const title = await buildTitle();
   const titleStr = title ? `# ${title} \n` : "";
   const descriptionStr = await buildDescription();
-  let headers = {
-    title: title,
-  };
   const installationStr = await buildInstallation();
-  const tableOfContentsStr = await buildTableOfContents(
-    "tableOfContents",
-    installationStr
-  );
+  const headers = {
+    "Installation": installationStr !== ""
+  };
+  const tableOfContentsStr = await buildTableOfContents(headers);
 
-  // console.log(titleStr);
   readMeStr += `${titleStr}${descriptionStr}${tableOfContentsStr}${installationStr}`;
   console.log(readMeStr);
   fs.writeFile(filename, readMeStr, (err) =>
@@ -38,12 +34,7 @@ const buildTitle = async () => {
     .then((data) => {
       const { title } = data;
       titleStr = title;
-      // if (title) {
-      //   titleStr = `# ${title}
-      // `;
-      // }
     });
-  // console.log(titleStr);
   return titleStr;
 };
 
@@ -144,16 +135,31 @@ const buildInstallation = async () => {
   return installationStr;
 };
 
-const buildTableOfContents = async (tableOfContents, ...variables) => {
-  console.log("variables: ", variables);
-  // console.log(data)
+const buildTableOfContents = async (headers) => {
+  console.log("headers: ", headers);
   let tableOfContentsStr = "";
-  if (tableOfContents) {
-    tableOfContentsStr = `\n## tableOfContents
-    ${tableOfContents}
-    
-    `;
-  }
+  await inquirer
+  .prompt([
+    {
+      name: "tableOfContents",
+      type: "confirm",
+      message: "Add table of contents?",
+    },
+  ])
+  .then((data) => {
+    const { tableOfContents } = data;
+    if (tableOfContents) {
+      tableOfContentsStr = `\n## Table Of Contents \n`;
+      for (const [key,value] of Object.entries(headers)){
+        console.log('key: ', key)
+        console.log('value: ', value)
+        if(value === true){
+          tableOfContentsStr += ` - [${key}](#${key.toLowerCase()}) \n`
+        }
+      }
+    }
+  })
+
   return tableOfContentsStr;
 };
 
