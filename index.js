@@ -11,7 +11,8 @@ async function buildReadme() {
   const installationStr = await buildInstallation();
   const usageStr = await buildUsage();
   const headers = {
-    "Installation": installationStr !== ""
+    "Installation": installationStr !== "",
+    "Usage": usageStr !== ""
   };
   const tableOfContentsStr = await buildTableOfContents(headers);
 
