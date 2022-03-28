@@ -276,6 +276,14 @@ const buildLicense = async () => {
           name: "licenseYear",
           type: "input",
           message: "Copyright: Year?",
+          validate: answer => {
+            if(Number.parseInt(answer) == answer){
+              return true;
+            } else {
+              console.log("\nNeeds to be a number.")
+              return false;
+            }
+          }
         },
         {
           name: "licenseFullName",
