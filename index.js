@@ -258,7 +258,7 @@ const buildLicense = async () => {
       {
         name: "header",
         type: "confirm",
-        message: "Add MIT license?",
+        message: "Add a license?",
       },
     ])
     .then((data) => {
@@ -273,6 +273,12 @@ const buildLicense = async () => {
     await inquirer
       .prompt([
         {
+          name: "licenseType",
+          type: "list",
+          message: "What license type?",
+          choices: ['mit','apache-2.0','gpl-3.0']
+        },
+        {
           name: "licenseYear",
           type: "input",
           message: "Copyright: Year?",
@@ -280,7 +286,7 @@ const buildLicense = async () => {
             if(Number.parseInt(answer) == answer){
               return true;
             } else {
-              console.log("\nNeeds to be a number.")
+              console.log("\nNeeds to be a year number.")
               return false;
             }
           }
@@ -292,12 +298,35 @@ const buildLicense = async () => {
         }
       ])
       .then((data) => {
-        const { licenseYear, licenseFullName} = data;
-        licenseStr += `\n\nThe MIT License (MIT)\n\nCopyright (c) ${licenseYear} ${licenseFullName}\n\nPermission is hereby granted, free of charge, to any person obtaining a copy\nof this software and associated documentation files (the \"Software\"), to deal\nin the Software without restriction, including without limitation the rights\nto use, copy, modify, merge, publish, distribute, sublicense, and/or sell\ncopies of the Software, and to permit persons to whom the Software is\nfurnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE.\n \n`;
+        const {licenseType, licenseYear, licenseFullName} = data;
+        licenseStr += licenseOptions(licenseType, licenseYear, licenseFullName)
         needLicense = false
+      
       });
   };
   return licenseStr;
+};
+
+
+const buildBadge = async () => {
+  let badgeStr = "";
+  await inquirer
+    .prompt([
+      {
+        name: "badgeType",
+        type: "list",
+        message: "What badge type?",
+        choices: ['']
+      },
+    ])
+    .then((data) => {
+      const { header } = data;
+      
+      const {badgeType} = data;
+      badgeStr += badgeOptions(badgeType)
+    });
+
+  return badgeStr;
 };
 
 const buildTableOfContents = async (headers) => {
@@ -324,6 +353,19 @@ const buildTableOfContents = async (headers) => {
 
   return tableOfContentsStr;
 };
+
+const badgeOptions = (badgeType) => {
+
+}
+
+const licenseOptions = (licenseName, year, fullName) => {
+  const licenses = {
+    'mit': `\n\nThe MIT License (MIT)\n\nCopyright (c) ${year} ${fullName}\n\nPermission is hereby granted, free of charge, to any person obtaining a copy\nof this software and associated documentation files (the \"Software\"), to deal\nin the Software without restriction, including without limitation the rights\nto use, copy, modify, merge, publish, distribute, sublicense, and/or sell\ncopies of the Software, and to permit persons to whom the Software is\nfurnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE.\n \n`,
+    'apache-2.0': `### [Apache License](http://www.apache.org/licenses/)\n Version 2.0, January 2004\n\n A permissive license whose main conditions require preservation of copyright and license notices. Contributors provide an express grant of patent rights. Licensed works, modifications, and larger works may be distributed under different terms and without source code.\n`,
+    'gpl-3.0': `### [GNU General Public License v3.0](https://www.gnu.org/licenses/gpl-3.0.en.html) \nPermissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights.`
+  }
+  return licenses[licenseName];
+}
 
 buildReadme();
 
