@@ -12,6 +12,7 @@ async function buildReadme() {
   const usageStr = await buildUsage();
   const contributorStr = await buildContributor();
   const licenseStr = await buildLicense();
+  const badgeStr = await buildBadge();
   
   const headers = {
     "Installation": installationStr !== "",
@@ -21,7 +22,7 @@ async function buildReadme() {
   };
   const tableOfContentsStr = await buildTableOfContents(headers);
 
-  readMeStr += `${titleStr}${descriptionStr}${tableOfContentsStr}${installationStr}${usageStr}${contributorStr}${licenseStr}`;
+  readMeStr += `${titleStr}${badgeStr}${descriptionStr}${tableOfContentsStr}${installationStr}${usageStr}${contributorStr}${licenseStr}`;
   console.log(readMeStr);
   fs.writeFile(filename, readMeStr, (err) =>
     err ? console.log(err) : console.log(`Success! Please check ${filename}`)
@@ -314,16 +315,16 @@ const buildBadge = async () => {
     .prompt([
       {
         name: "badgeType",
-        type: "list",
+        type: "checkbox",
         message: "What badge type?",
-        choices: ['']
+        choices: ['JavaScript', 'HTML', 'CSS', 'NodeJS', 'ExpressJS', 'Python', 'React', 'React Native', 'MongoDB', 'MySQL']
       },
     ])
     .then((data) => {
-      const { header } = data;
-      
       const {badgeType} = data;
-      badgeStr += badgeOptions(badgeType)
+      if(badgeType.length > 0){
+        badgeStr += badgeOptions(badgeType)
+      }
     });
 
   return badgeStr;
@@ -355,6 +356,26 @@ const buildTableOfContents = async (headers) => {
 };
 
 const badgeOptions = (badgeType) => {
+  let badgesIcons = '';
+  const badgeInfo = {
+    'JavaScript': '\n <img src="https://img.shields.io/badge/JavaScript-323330?style=flat&logo=javascript&logoColor=F7DF1E" alt="JavaScript Badge"/>',
+    'HTML': '\n <img src="https://img.shields.io/badge/HTML5-E34F26?style=flat&logo=html5&logoColor=white" alt="HTML5 Badge"/>',
+    'CSS': '\n <img src="https://img.shields.io/badge/CSS3-1572B6?style=flat&logo=css3&logoColor=white" alt="CSS3 Badge"/>',
+    'NodeJS': '\n <img src="https://img.shields.io/badge/Node.js-43853D?style=flat&logo=node.js&logoColor=white" alt="NodeJS Badge"/>',
+    'ExpressJS': '\n <img src="https://img.shields.io/badge/Express.js-404D59?style=flat" alt="ExpressJS Badge"/>',
+    'Python': '\n <img src="https://img.shields.io/badge/Python-14354C?style=flat&logo=python&logoColor=white" alt="Python Badge"/>',
+    'React': '\n <img src="https://img.shields.io/badge/React-20232A?style=flat&logo=react&logoColor=61DAFB" alt="React Badge"/>',
+    'React Native': '\n <img src="https://img.shields.io/badge/React_Native-20232A?style=flat&logo=react&logoColor=61DAFB" alt="React Native Badge"/>',
+    'MongoDB': '\n <img src="https://img.shields.io/badge/MongoDB-4EA94B?style=flat&logo=mongodb&logoColor=white" alt="MongoDB Badge"/>',
+    'MySQL': '\n <img src="https://img.shields.io/badge/MySQL-00000F?style=flat&logo=mysql&logoColor=white" alt="MySQL Badge"/>'
+  }
+
+  badgesIcons += '<div align="center">'
+  badgeType.map((badgeName) => {
+    badgesIcons += badgeInfo[badgeName]
+  })
+  badgesIcons += '\n</div>\n'
+  return badgesIcons;
 
 }
 
