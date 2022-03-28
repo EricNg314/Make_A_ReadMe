@@ -1,5 +1,6 @@
 const inquirer = require("inquirer");
 const fs = require("fs");
+const { title } = require("process");
 
 let readMeStr = "";
 
@@ -11,15 +12,17 @@ async function buildReadme() {
   const installationStr = await buildInstallation();
   const usageStr = await buildUsage();
   const contributorStr = await buildContributor();
+  const licenseStr = await buildLicense();
   
   const headers = {
     "Installation": installationStr !== "",
     "Usage": usageStr !== "",
-    "Contributor": contributorStr !== ""
+    "Contributor": contributorStr !== "",
+    "License": licenseStr !== ""
   };
   const tableOfContentsStr = await buildTableOfContents(headers);
 
-  readMeStr += `${titleStr}${descriptionStr}${tableOfContentsStr}${installationStr}${usageStr}${contributorStr}`;
+  readMeStr += `${titleStr}${descriptionStr}${tableOfContentsStr}${installationStr}${usageStr}${contributorStr}${licenseStr}`;
   console.log(readMeStr);
   fs.writeFile(filename, readMeStr, (err) =>
     err ? console.log(err) : console.log(`Success! Please check ${filename}`)
@@ -34,6 +37,13 @@ const buildTitle = async () => {
         name: "title",
         type: "input",
         message: "Title:",
+        validate: answer => {
+          if(answer){
+            return true;
+          } else {
+            console.log("Please provide a title.")
+          }
+        }
       },
     ])
     .then((data) => {
@@ -71,10 +81,10 @@ const buildDescription = async () => {
     .then((data) => {
       const { motivation, why, problem, learn } = data;
       descriptionStr = `\n## Description \n`;
-      descriptionStr += ` - What was your motivation? ${motivation} \n`;
-      descriptionStr += ` - Why did you build this project? ${why} \n`;
-      descriptionStr += ` - What problem does it solve? ${problem} \n`;
-      descriptionStr += ` - What did you learn? ${learn} \n\n`;
+      descriptionStr += ` - What was your motivation? \n   - ${motivation} \n`;
+      descriptionStr += ` - Why did you build this project? \n   - ${why} \n`;
+      descriptionStr += ` - What problem does it solve? \n   - ${problem} \n`;
+      descriptionStr += ` - What did you learn? \n   - ${learn} \n\n`;
     });
   return descriptionStr;
 };
@@ -153,17 +163,17 @@ const buildUsage = async () => {
         {
           name: "usageText",
           type: "input",
-          message: "How to use: Text?",
+          message: "Usage: Text?",
         },
         {
           name: "usageCode",
           type: "input",
-          message: "How to use: Code?",
+          message: "Usage: Code?",
         },
         {
           name: "usageImage",
           type: "input",
-          message: "How to use: Image link? (leave blank if N/A)",
+          message: "Usage: Image link? (leave blank if N/A)",
         },
         {
           name: "moreInstructions",
@@ -241,8 +251,49 @@ const buildContributor = async () => {
   return contributorStr;
 };
 
+const buildLicense = async () => {
+  let licenseStr = "";
+  let needLicense = false;
+  await inquirer
+    .prompt([
+      {
+        name: "header",
+        type: "confirm",
+        message: "Add MIT license?",
+      },
+    ])
+    .then((data) => {
+      const { header } = data;
+      
+      if (header === true) {
+        licenseStr = `\n## License \n`;
+      }
+      needLicense = header;
+    });
+  if (needLicense === true) {
+    await inquirer
+      .prompt([
+        {
+          name: "licenseYear",
+          type: "input",
+          message: "Copyright: Year?",
+        },
+        {
+          name: "licenseFullName",
+          type: "input",
+          message: "Copyright: Full Name?",
+        }
+      ])
+      .then((data) => {
+        const { licenseYear, licenseFullName} = data;
+        licenseStr += `\n\nThe MIT License (MIT)\n\nCopyright (c) ${licenseYear} ${licenseFullName}\n\nPermission is hereby granted, free of charge, to any person obtaining a copy\nof this software and associated documentation files (the \"Software\"), to deal\nin the Software without restriction, including without limitation the rights\nto use, copy, modify, merge, publish, distribute, sublicense, and/or sell\ncopies of the Software, and to permit persons to whom the Software is\nfurnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE.\n \n`;
+        needLicense = false
+      });
+  };
+  return licenseStr;
+};
+
 const buildTableOfContents = async (headers) => {
-  console.log("headers: ", headers);
   let tableOfContentsStr = "";
   await inquirer
   .prompt([
@@ -257,8 +308,6 @@ const buildTableOfContents = async (headers) => {
     if (tableOfContents) {
       tableOfContentsStr = `\n## Table Of Contents \n`;
       for (const [key,value] of Object.entries(headers)){
-        console.log('key: ', key)
-        console.log('value: ', value)
         if(value === true){
           tableOfContentsStr += ` - [${key}](#${key.toLowerCase()}) \n`
         }
