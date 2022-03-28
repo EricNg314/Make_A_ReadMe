@@ -10,13 +10,16 @@ async function buildReadme() {
   const descriptionStr = await buildDescription();
   const installationStr = await buildInstallation();
   const usageStr = await buildUsage();
+  const contributorStr = await buildContributor();
+  
   const headers = {
     "Installation": installationStr !== "",
-    "Usage": usageStr !== ""
+    "Usage": usageStr !== "",
+    "Contributor": contributorStr !== ""
   };
   const tableOfContentsStr = await buildTableOfContents(headers);
 
-  readMeStr += `${titleStr}${descriptionStr}${tableOfContentsStr}${installationStr}${usageStr}`;
+  readMeStr += `${titleStr}${descriptionStr}${tableOfContentsStr}${installationStr}${usageStr}${contributorStr}`;
   console.log(readMeStr);
   fs.writeFile(filename, readMeStr, (err) =>
     err ? console.log(err) : console.log(`Success! Please check ${filename}`)
@@ -82,18 +85,18 @@ const buildInstallation = async () => {
   await inquirer
     .prompt([
       {
-        name: "instruction",
+        name: "header",
         type: "confirm",
         message: "Add installation instructions?",
       },
     ])
     .then((data) => {
-      const { instruction } = data;
+      const { header } = data;
       
-      if (instruction === true) {
+      if (header === true) {
         installationStr = `\n## Installation \n`;
       }
-      needInstruction = instruction;
+      needInstruction = header;
     });
   while (needInstruction === true) {
     await inquirer
@@ -101,12 +104,12 @@ const buildInstallation = async () => {
         {
           name: "installText",
           type: "input",
-          message: "How to install(text)?",
+          message: "How to install: Text?",
         },
         {
           name: "installCode",
           type: "input",
-          message: "How to install(code)?",
+          message: "How to install: Code?",
         },
         {
           name: "moreInstructions",
@@ -132,18 +135,18 @@ const buildUsage = async () => {
   await inquirer
     .prompt([
       {
-        name: "instruction",
+        name: "header",
         type: "confirm",
         message: "Add usage instructions?",
       },
     ])
     .then((data) => {
-      const { instruction } = data;
+      const { header } = data;
       
-      if (instruction === true) {
+      if (header === true) {
         usageStr = `\n## Usage \n`;
       }
-      needInstruction = instruction;
+      needInstruction = header;
     });
   while (needInstruction === true) {
     await inquirer
@@ -151,12 +154,17 @@ const buildUsage = async () => {
         {
           name: "usageText",
           type: "input",
-          message: "How to usage(text)?",
+          message: "How to use: Text?",
         },
         {
           name: "usageCode",
           type: "input",
-          message: "How to usage(code)?",
+          message: "How to use: Code?",
+        },
+        {
+          name: "usageImage",
+          type: "input",
+          message: "How to use: Image link? (leave blank if N/A)",
         },
         {
           name: "moreInstructions",
@@ -165,14 +173,73 @@ const buildUsage = async () => {
         }
       ])
       .then((data) => {
-        const { usageText, usageCode, moreInstructions } = data;
+        const { usageText, usageCode, usageImage, moreInstructions } = data;
         usageStr += ` - ${usageText} \n`;
         usageStr += ' - ```\n    ' + usageCode + '\n    ``` \n';
-
+        if(usageImage !== ""){
+          usageStr += ` - <img src="${usageImage}" alt="${usageText}"/>\n`;
+        }
         needInstruction = moreInstructions
       });
   };
   return usageStr;
+};
+
+const buildContributor = async () => {
+  let contributorStr = "";
+  let needContributor = false;
+  await inquirer
+    .prompt([
+      {
+        name: "header",
+        type: "confirm",
+        message: "Add contributors?",
+      },
+    ])
+    .then((data) => {
+      const { header } = data;
+      
+      if (header === true) {
+        contributorStr = `\n## contributor \n`;
+      }
+      needContributor = header;
+    });
+  while (needContributor === true) {
+    await inquirer
+      .prompt([
+        {
+          name: "contributorName",
+          type: "input",
+          message: "Contributor: Name?",
+        },
+        {
+          name: "contributorLink",
+          type: "input",
+          message: "Contributor: Link?",
+        },
+        {
+          name: "contributorLinkText",
+          type: "input",
+          message: "Contributor: Link text?",
+        },
+        {
+          name: "moreContributors",
+          type: "confirm",
+          message: "Add more contributors?",
+        }
+      ])
+      .then((data) => {
+        const { contributorName, contributorLink, contributorLinkText, moreContributors } = data;
+        contributorStr += ` - **${contributorName}** `;
+        if(contributorLinkText !== "" || contributorLink !== ""){
+          contributorStr += ` - [${contributorLinkText}](${contributorLink}) \n`;
+        } else {
+          contributorStr += `\n`;
+        }
+        needContributor = moreContributors
+      });
+  };
+  return contributorStr;
 };
 
 const buildTableOfContents = async (headers) => {
