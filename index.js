@@ -1,6 +1,5 @@
 const inquirer = require("inquirer");
 const fs = require("fs");
-const { title } = require("process");
 
 let readMeStr = "";
 
