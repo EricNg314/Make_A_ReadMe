@@ -92,7 +92,6 @@ const buildInstallation = async () => {
     ])
     .then((data) => {
       const { header } = data;
-      
       if (header === true) {
         installationStr = `\n## Installation \n`;
       }
@@ -200,7 +199,7 @@ const buildContributor = async () => {
       const { header } = data;
       
       if (header === true) {
-        contributorStr = `\n## contributor \n`;
+        contributorStr = `\n## Contributor \n`;
       }
       needContributor = header;
     });
