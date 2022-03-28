@@ -9,12 +9,13 @@ async function buildReadme() {
   const titleStr = title ? `# ${title} \n` : "";
   const descriptionStr = await buildDescription();
   const installationStr = await buildInstallation();
+  const usageStr = await buildUsage();
   const headers = {
     "Installation": installationStr !== ""
   };
   const tableOfContentsStr = await buildTableOfContents(headers);
 
-  readMeStr += `${titleStr}${descriptionStr}${tableOfContentsStr}${installationStr}`;
+  readMeStr += `${titleStr}${descriptionStr}${tableOfContentsStr}${installationStr}${usageStr}`;
   console.log(readMeStr);
   fs.writeFile(filename, readMeStr, (err) =>
     err ? console.log(err) : console.log(`Success! Please check ${filename}`)
@@ -76,33 +77,24 @@ const buildDescription = async () => {
 
 const buildInstallation = async () => {
   let installationStr = "";
-  let completeInstruction = false;
-  let needHeader = true;
-  let needInstallation = true;
-  do {
-    if(needHeader === true){
-      await inquirer
-        .prompt([
-          {
-            name: "instruction",
-            type: "confirm",
-            message: "Add installation instructions?",
-          },
-        ])
-        .then((data) => {
-          const { instruction } = data;
-          
-          if (instruction === true) {
-            installationStr = `\n## Installation \n`;
-          }
-          needInstallation = instruction;
-          needHeader = false;
-        });
-    };
-    if(needInstallation === false){
-      // Ends loops if installation is not required.
-      break;
-    };
+  let needInstruction = false;
+  await inquirer
+    .prompt([
+      {
+        name: "instruction",
+        type: "confirm",
+        message: "Add installation instructions?",
+      },
+    ])
+    .then((data) => {
+      const { instruction } = data;
+      
+      if (instruction === true) {
+        installationStr = `\n## Installation \n`;
+      }
+      needInstruction = instruction;
+    });
+  while (needInstruction === true) {
     await inquirer
       .prompt([
         {
@@ -122,17 +114,64 @@ const buildInstallation = async () => {
         }
       ])
       .then((data) => {
-        console.log('data: ', data)
         const { installText, installCode, moreInstructions } = data;
         installationStr += ` - ${installText} \n`;
         installationStr += ' - ```\n    ' + installCode + '\n    ``` \n';
 
-        completeInstruction = !moreInstructions
+        needInstruction = moreInstructions
       });
-    // completeInstruction = true;
-  } while (completeInstruction === false);
+  };
 
   return installationStr;
+};
+
+const buildUsage = async () => {
+  let usageStr = "";
+  let needInstruction = false;
+  await inquirer
+    .prompt([
+      {
+        name: "instruction",
+        type: "confirm",
+        message: "Add usage instructions?",
+      },
+    ])
+    .then((data) => {
+      const { instruction } = data;
+      
+      if (instruction === true) {
+        usageStr = `\n## Usage \n`;
+      }
+      needInstruction = instruction;
+    });
+  while (needInstruction === true) {
+    await inquirer
+      .prompt([
+        {
+          name: "usageText",
+          type: "input",
+          message: "How to usage(text)?",
+        },
+        {
+          name: "usageCode",
+          type: "input",
+          message: "How to usage(code)?",
+        },
+        {
+          name: "moreInstructions",
+          type: "confirm",
+          message: "Add more instructions?",
+        }
+      ])
+      .then((data) => {
+        const { usageText, usageCode, moreInstructions } = data;
+        usageStr += ` - ${usageText} \n`;
+        usageStr += ' - ```\n    ' + usageCode + '\n    ``` \n';
+
+        needInstruction = moreInstructions
+      });
+  };
+  return usageStr;
 };
 
 const buildTableOfContents = async (headers) => {
