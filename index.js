@@ -4,7 +4,7 @@ const fs = require("fs");
 let readMeStr = "";
 
 async function buildReadme() {
-  const filename = "./result/README.md";
+  const filename = "./assets/README.md";
   const title = await buildTitle();
   const titleStr = title ? `# ${title} \n` : "";
   const descriptionStr = await buildDescription();
