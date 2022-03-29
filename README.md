@@ -7,6 +7,10 @@
 ## Description 
 Command line application to build a quick README markdown file.
 
+
+https://user-images.githubusercontent.com/38299163/160545572-fb73a562-40cc-4b04-9065-2e6fded77428.mov
+
+
 ## Table Of Contents 
  - [Installation](#installation) 
  - [Usage](#usage) 
